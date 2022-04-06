@@ -1,0 +1,69 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import statistics 
+
+df = pd.read_csv("savant_data (1).csv")
+
+df["game_date"] = pd.to_datetime(df["game_date"], format="%Y-%m-%d") #allow python to read 'game date' as a datetime type
+#df.info()
+
+lamet = df[df["player_name"] == "Lamet, Dinelson"].copy()  #lets extract Dinelson Lamet pitches only
+#lamet.head()
+
+lamet["pfx_x inches"] = lamet["pfx_x"]*12  #converting horizontal break from feet to inches
+lamet["pfx_z inches"] = lamet["pfx_z"]*12  #converting vertical break from feet to inches
+
+lamet_before_summer = lamet[lamet["game_date"]<= "2021-07-15"].copy()  #separates Lamet's data into April/May/June data and September/October data 
+lamet_after_summer = lamet[lamet["game_date"]>= "2021-07-15"].copy()   #separates Lamet's data into April/May/June data and September/October data 
+
+#buckets his pitch types together so we can analyze each pitch before/after the summer
+FF_before = lamet_before_summer["pitch_type"] == "FF"
+FF_before_summer = lamet_before_summer[FF_before]
+
+SI_before = lamet_before_summer["pitch_type"] == "SI"
+SI_before_summer = lamet_before_summer[SI_before]
+
+SL_before = lamet_before_summer["pitch_type"] == "SL"
+SL_before_summer = lamet_before_summer[SL_before]
+
+CH_before = lamet_before_summer["pitch_type"] == "CH"
+CH_before_summer = lamet_before_summer[CH_before]
+
+FF_after = lamet_after_summer["pitch_type"] == "FF"
+FF_after_summer = lamet_after_summer[FF_after]
+
+SI_after = lamet_after_summer["pitch_type"] == "SI"
+SI_after_summer = lamet_after_summer[SI_after]
+
+SL_after = lamet_after_summer["pitch_type"] == "SL"
+SL_after_summer = lamet_after_summer[SL_after]
+
+CH_after = lamet_after_summer["pitch_type"] == "CH"
+CH_after_summer = lamet_after_summer[CH_after]
+
+#create histogram of Lamet's fastball horizontal break early season
+ff_horizbreak_earlyseason=FF_before_summer["pfx_x inches"]
+plt.hist(ff_horizbreak_earlyseason,bins=20,range=[-12,3])
+plt.xlabel("Horizontal Movement (inches) From Catcher's Perspective")
+plt.ylabel("Count: Number of Pitches")
+plt.title("Dinelson Lamet 2021 FF Horizontal Movement Pre-Summer")
+
+#create histogram of Lamet's fastball horizontal break late season
+ff_horizbreak_lateseason=FF_after_summer["pfx_x inches"]
+plt.hist(ff_horizbreak_lateseason, bins=20, range=[-12,3])
+plt.xlabel("Horizontal Movement (inches) From Catcher's Perspective")
+plt.ylabel("Count: Number of Pitches")
+plt.title("Dinelson Lamet 2021 FF Horizontal Movement Post-Summer")
+
+print(round(statistics.median(ff_horizbreak_earlyseason),2))
+print(round(statistics.median(ff_horizbreak_lateseason),2))
+
+ff_vertbreak_earlyseason=FF_before_summer["pfx_z inches"]
+ff_vertbreak_lateseason=FF_after_summer["pfx_z inches"]
+print(statistics.median(ff_vertbreak_earlyseason))
+print(statistics.median(ff_vertbreak_lateseason))
+
+ff_velo_earlyseason=FF_before_summer["release_speed"]
+ff_velo_lateseason=FF_after_summer["release_speed"]
+print(round(statistics.mean(ff_velo_earlyseason),2))
+print(round(statistics.mean(ff_velo_lateseason),2))
